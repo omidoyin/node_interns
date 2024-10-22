@@ -1,0 +1,49 @@
+extends layout
+
+block content
+  .container
+      .row
+          .col-md-4
+            .card.mb-4.shadow-sm
+            if product
+              img.bd-placeholder-img.card-img-top(width="100%", height="225", src=product.image)
+              .card-body
+                h5.card-title= product.title
+                p.card-text= product.description
+                .d-flex.justify-content-between.align-items-center
+                  .btn-group
+                    //- a.btn.btn-sm.btn-outline-secondary(href=`/product/${product.id}`, role="button") View
+                    button.btn.btn-sm.btn-outline-secondary(type="button", onclick="buyNow()") Buy
+                  small.text-muted $#{product.price}
+
+  // Add Stripe.js
+  script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js")
+    //- script(src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js")
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js")
+    script(src="https://js.stripe.com/v3/")
+    script.
+      const stripe = Stripe(`pk_test_51OUyRXBzE7RBUe9gYdNS6nh6Bp9CLvOLWBaAnqKPXInOKqiyl7mPDsjbCtk2hlVAcPTv82oyo0kYi5s7d2oPX5jg00VMjjPeUa`);
+      const productId = '#{product.id}';
+
+      async function buyNow() {
+        const response = await fetch('/products/create-checkout-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: productId,
+            quantity: 1,
+          }),
+        });
+
+        const session = await response.json();
+        const result = await stripe.redirectToCheckout({
+          sessionId: session.id,
+        });
+
+        if (result.error) {
+          console.error(result.error.message);
+        }
+      }
+

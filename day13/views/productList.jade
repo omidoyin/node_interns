@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1 Products
+  .row
+    each product in products
+      .col-md-4
+        .card
+          img.card-img-top(src=product.image, alt=product.title)
+          .card-body
+            h5.card-title= product.title
+            p.card-text= product.description
+            p.card-text
+              strong $#{product.price}
+            a.btn.btn-primary(href=`/products/${product.id}`) View Product

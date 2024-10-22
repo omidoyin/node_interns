@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Quiz</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap");
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        font-family: "Open Sans", sans-serif;
+        line-height: 1.4;
+        background-color: #333;
+      }
+
+      .main {
+        margin: 0 auto;
+        width: 600px;
+        margin-top: 200px;
+
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        /* box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; */
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+          rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      button {
+        padding: 10px;
+        border: 10px;
+        background-color: teal;
+        font-weight: bold;
+        color: white;
+        border-radius: 2px;
+      }
+      button:hover {
+        cursor: pointer;
+      }
+      input {
+        margin: 10px;
+        border: none;
+        font-size: large;
+        color: rgba(0, 128, 128, 0.616);
+      }
+      textarea {
+        border: none;
+        font-size: large;
+        color: rgba(0, 128, 128, 0.616);
+      }
+      ul {
+        list-style: none;
+        margin-bottom: 10px;
+      }
+      #bool {
+        list-style: none;
+        display: flex;
+        flex-direction: row;
+        margin: 10px;
+      }
+      textarea:focus,
+      input:focus {
+        outline: none;
+      }
+
+      #yourAnswers p {
+        margin-top: 30px;
+        color: teal;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <h1>Quiz</h1>
+      <div id="yourAnswers" class="hidden">
+        <h1>Your answers</h1>
+        <pre id="answerObject"></pre>
+      </div>
+      <div class="question" id="questionsDiv">
+        <h2 id="title"></h2>
+        <ul id="selectionList"></ul>
+        <input id="short" type="text" class="hidden" />
+        <textarea
+          name=""
+          id="long"
+          class="hidden"
+          cols="30"
+          rows="10"
+        ></textarea>
+        <div id="bool"></div>
+        <button id="next">Next</button>
+      </div>
+    </div>
+
+    <script>
+      // Fetch quiz data from API
+      const getQuiz = async () => {
+        try {
+          const result = await fetch("http://localhost:3000/quizzes/api/v1/quiz");
+    
+          if (result.ok) {
+            const data = await result.json();
+            return data;
+          } else {
+            console.error("Failed to fetch quiz data:", result.status, result.statusText);
+            return [];
+          }
+        } catch (error) {
+          console.error("Error fetching quiz data:", error);
+          return [];
+        }
+      };
+    
+      // Function to handle quiz data
+      const handleQuizData = async () => {
+        let quiz = await getQuiz(); // Fetch quiz data from the API
+    
+        // The rest of your logic stays the same, but now using the API data
+        let nextButton = document.getElementById("next");
+        let title = document.getElementById("title");
+        let selectionList = document.getElementById("selectionList");
+        let bool = document.getElementById("bool");
+        let inp = document.getElementById("short");
+        let text = document.getElementById("long");
+        let yourAnswers = document.getElementById("yourAnswers");
+        let questionsDiv = document.getElementById("questionsDiv");
+        let i = 0;
+    
+        let answers = {};
+    
+        // Step logic
+        nextButton.onclick = function () {
+          if (quiz[i].type == "short_answer") {
+            let x = document.getElementsByClassName("current")[0];
+            let currentAnswer = x.value;
+            let question = quiz[i].question;
+            let answer = { [question]: currentAnswer };
+            answers = { ...answers, [quiz[i].id]: { ...answer } };
+            x.classList.toggle("hidden");
+            x.classList.remove("current");
+          } else if (
+            quiz[i].type == "multiple_choice" ||
+            quiz[i].type == "multiple_selection_choice"
+          ) {
+            let x = document.querySelector(`input[name="question${i}_choice"]`);
+            let currentAnswer = x.value;
+            let question = quiz[i].question;
+            let answer = { [question]: currentAnswer };
+            answers = { ...answers, [quiz[i].id]: { ...answer } };
+            x.classList.toggle("hidden");
+          } else if (
+            quiz[i].type == "long_text" ||
+            quiz[i].type == "description"
+          ) {
+            let x = document.getElementsByClassName("current")[0];
+            let currentAnswer = x.value;
+            let question = quiz[i].question;
+            let answer = { [question]: currentAnswer };
+            answers = { ...answers, [quiz[i].id]: { ...answer } };
+            x.classList.toggle("hidden");
+            x.classList.remove("current");
+          } else if (quiz[i].type == "true_false") {
+            let x = document.querySelector("input[name=bool]");
+            let currentAnswer = x.value;
+            let question = quiz[i].question;
+            let answer = { [question]: currentAnswer };
+            answers = { ...answers, [quiz[i].id]: { ...answer } };
+            x.classList.toggle("hidden");
+          }
+          console.log(i);
+          ++i;
+          if (i > quiz.length - 1) {
+            // Display answer
+            questionsDiv.classList.toggle("hidden");
+            yourAnswers.classList.toggle("hidden");
+            const myJSON = JSON.stringify(answers, null, "\t");
+            document.getElementById("answerObject").innerHTML = myJSON;
+            return;
+          }
+          populateQuestion(i);
+        };
+    
+        // Generate question
+        function populateQuestion(qNum) {
+          let individualQuestion = quiz[qNum];
+          title.innerText = individualQuestion.question;
+    
+          // Condition to check type of question
+          if (individualQuestion.type == "short_answer") {
+            selectionList.innerHTML = "";
+            short.classList.toggle("hidden");
+            short.classList.add("current");
+            short.placeholder = "your reason here";
+          } else if (
+            individualQuestion.type == "multiple_choice" ||
+            individualQuestion.type == "multiple_selection_choice"
+          ) {
+            selectionList.innerHTML = ""; // Reset choices list
+            for (j in individualQuestion.answers) {
+              let radioBtnName = "question" + qNum + "_choice";
+              let choiceText = individualQuestion.answers[j].answer;
+              selectionList.appendChild(createLi(radioBtnName, choiceText));
+            }
+          } else if (
+            individualQuestion.type == "long_text" ||
+            individualQuestion.type == "description"
+          ) {
+            selectionList.innerHTML = "";
+            long.classList.toggle("hidden");
+            long.classList.add("current");
+            long.placeholder = "your reason here";
+          } else if (individualQuestion.type == "true_false") {
+            selectionList.innerHTML = "";
+            bool.appendChild(createLi("bool", "True"));
+            bool.appendChild(createLi("bool", "True"));
+          }
+        }
+    
+        // Multiple choice
+        function createLi(name, choiceText) {
+          let e = document.createElement("li");
+          let radioHtml =
+            '<input value="' + choiceText + '" type="radio" name="' + name + '"';
+          radioHtml += "/>";
+          radioHtml += choiceText;
+          e.innerHTML = radioHtml;
+          return e;
+        }
+    
+        // Call function at the beginning
+        populateQuestion(i);
+      };
+    
+      handleQuizData(); // Start the quiz with data from the API
+    </script>
+    
+  </body>
+</html>

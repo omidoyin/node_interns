@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1= title
+  form(action="/api/v1/import" method="POST" enctype="multipart/form-data")
+    
+    input(type="file" name="file" required)
+    button(type="submit") Import
+
+
+    
+  a(href="/api/v1/export") Export CSV

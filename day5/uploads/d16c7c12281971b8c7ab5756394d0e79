@@ -1,0 +1,4 @@
+﻿"id,order_id,user_id,shipping_dock_id,amount,discount,tax,total,notes,status"
+"1,ORD-001,USR-001,SD-001,100.00,10.00,7.00,97.00,""Sample order notes"",1"
+"2,ORD-002,USR-002,SD-002,150.00,15.00,10.50,144.50,""Another order notes"",0"
+"3,ORD-003,USR-003,SD-003,75.00,5.00,5.25,74.25,""Order with discount"",1"

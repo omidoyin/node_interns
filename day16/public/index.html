@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fabric.js Color Picker</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+
+    <style>
+      /* .wrapper {
+        display: flex;
+        flex-direction: column-reverse;
+        border: 4px red solid;
+      } */
+
+      #color-picker {
+        /* display: flex;
+        justify-content: center; */
+        margin-bottom: 10px;
+      }
+      .color-swatch {
+        width: 30px;
+        height: 30px;
+        margin: 0 5px;
+        cursor: pointer;
+      }
+      #download-btn {
+        display: block;
+        margin: 10px auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="nav">
+        <a href="/element">
+          <span class="nav-item">Element</span>
+        </a>
+        <a href="/image">
+          <span class="nav-item">Image</span>
+        </a>
+        <a href="/text">
+          <span class="nav-item">Text</span>
+        </a>
+        <a href="/">
+          <span class="nav-item">Background</span>
+        </a>
+      </div>
+      <div class="btn-container"></div>
+      <!-- <div style="padding: 7rem; background-color: lightgray">
+        <canvas id="canvas" width="800" height="600"></canvas>
+      </div> -->
+      <div>
+        <div id="color-picker"></div>
+        <canvas id="canvas" width="600" height="400"></canvas>
+        <button id="download-btn">Download</button>
+      </div>
+    </div>
+
+    <script>
+      const canvas = new fabric.Canvas("canvas");
+      const colorPicker = document.getElementById("color-picker");
+      const downloadBtn = document.getElementById("download-btn");
+
+      // Generate 10 random colors
+      const colors = Array.from(
+        { length: 10 },
+        () =>
+          "#" +
+          Math.floor(Math.random() * 16777215)
+            .toString(16)
+            .padStart(6, "0")
+      );
+
+      // Create color swatches
+      colors.forEach((color) => {
+        const swatch = document.createElement("div");
+        swatch.className = "color-swatch";
+        swatch.style.backgroundColor = color;
+        swatch.onclick = () =>
+          canvas.setBackgroundColor(color, canvas.renderAll.bind(canvas));
+        colorPicker.appendChild(swatch);
+      });
+
+      // Download functionality
+      downloadBtn.onclick = () => {
+        const dataURL = canvas.toDataURL({
+          format: "png",
+          quality: 1,
+        });
+        const link = document.createElement("a");
+        link.download = "canvas.png";
+        link.href = dataURL;
+        link.click();
+      };
+    </script>
+  </body>
+</html>

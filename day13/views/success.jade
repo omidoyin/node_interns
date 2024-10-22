@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  .jumbotron.text-center
+    h1 Thank You!
+    p.lead Your order has been successfully placed.
+    hr
+    h3 Order Details
+    table.table
+      tr
+        th Product
+        td= product.title
+      tr
+        th Price
+        td $#{total}
+      tr
+        th Payment Method
+        td= paymentMethod
+    a.btn.btn-primary(href="/") Back to Home
