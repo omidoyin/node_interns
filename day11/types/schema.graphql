@@ -1,0 +1,284 @@
+directive @verifyUser on FIELD_DEFINITION
+
+scalar Date
+scalar Upload
+
+type User {
+  id: ID!
+  status: Int
+  first_name: String
+  last_name: String
+  phone: String
+  image: String
+  image_id: Int
+  refer: String
+  profile_id: Int
+  role_id: Int
+  font_color: String
+  time_zone: String
+  time_format: Int
+  clock_format: Int
+  date_format: Int
+  location: String
+  sync_code: String
+  expire_at: Date
+  created_at: Date
+  updated_at: Date
+  profile: Profile
+}
+
+type Image {
+  id: ID!
+  url: String
+  caption: String
+  width: Int
+  height: Int
+  type: Int
+  status: Int
+  user_id: Int
+  created_at: Date
+  updated_at: Date
+
+  user: User
+}
+
+type Note {
+  id: ID!
+  message: String
+  status: Int
+  created_at: Date
+  updated_at: Date
+  user: User
+}
+
+type Calendar {
+  id: ID!
+  user_id: Int
+  title: String
+  start_date: Date
+  end_date: Date
+  status: Int
+  created_at: Date
+  updated_at: Date
+  user: User
+}
+
+type Profile {
+  id: ID!
+  user_id: Int
+  timezone: String
+  dashboard_code: String
+  code: String
+  status: Int
+  created_at: Date
+  updated_at: Date
+  user: User
+}
+
+type Link {
+  id: ID!
+  email: String
+  user_id: Int
+  link: String
+  status: Int
+  created_at: Date
+  updated_at: Date
+
+  user: User
+}
+
+type MutationResponse {
+  success: Boolean!
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+
+type ErrorResponse {
+  path: String
+  message: String
+}
+
+type UserResponse {
+  success: Boolean!
+  data: User
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+input SyncCalendarInput {
+  event_id: String!
+  title: String!
+  start_date: Date!
+  end_date: Date!
+}
+type AllCalendarEventsResponse {
+  success: Boolean!
+  data: [Calendar!]
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+type CustomImageResponse {
+  success: Boolean!
+  data: Image
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+type AllNotesResponse {
+  success: Boolean!
+  data: [Note]
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+type File {
+  id: ID
+  filename: String
+  mimetype: String
+  path: String
+}
+type FileUploadResponse {
+  success: Boolean!
+  data: File
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+type LinkResponse {
+  success: Boolean!
+  data: Link
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+
+type StepsImagesResponse {
+  success: Boolean!
+  data: [String]
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+
+# New defs
+
+type AllMoviesResponse {
+  success: Boolean!
+  data: [Movie!]
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+type ReviewResponse {
+  success: Boolean!
+  data: [Review!]
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+type DirectorResponse {
+  success: Boolean!
+  data: [Director!]
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+type ActorResponse {
+  success: Boolean!
+  data: [Actor!]
+  message: String
+  errors: [ErrorResponse!]
+  code: String
+}
+
+type Movie {
+  id: Int!
+  title: String!
+  director: String!
+  main_genre: String!
+  status: String!
+  review: Float
+  actors: [Actor!]!
+}
+
+type Review {
+  id: Int!
+  notes: String
+  movie: Movie!
+}
+
+type Director {
+  id: Int!
+  name: String!
+}
+
+type Actor {
+  id: Int!
+  name: String!
+}
+
+type Genre {
+  id: Int!
+  name: String!
+}
+
+
+type Query {
+  user: UserResponse! @verifyUser
+
+  getAllNotes: AllNotesResponse! @verifyUser
+
+  getAllCalendarEvents: AllCalendarEventsResponse! @verifyUser
+
+  getCustomImage: CustomImageResponse! @verifyUser
+
+  link: LinkResponse! @verifyUser
+
+  getStepsImages: StepsImagesResponse!
+
+  movies: AllMoviesResponse!
+  reviews: ReviewResponse!
+  directors: DirectorResponse!
+  actors: ActorResponse!
+  moviesWithReviewsAbove(threshold: Float!): AllMoviesResponse!
+}
+
+type Mutation {
+  updateUser(
+    sync_code: String
+    font_color: String
+    time_zone: String
+    time_format: Int
+    clock_format: Int
+    date_format: Int
+    location: String
+    lat: Float
+    lng: Float
+  ): MutationResponse! @verifyUser
+
+  createNote(message: String!): MutationResponse! @verifyUser
+  updateNote(id: ID!, message: String!): MutationResponse! @verifyUser
+  deleteNote(id: ID!): MutationResponse! @verifyUser
+
+  createLink(link: String!): MutationResponse! @verifyUser
+  deactivateAllLinks: MutationResponse! @verifyUser
+
+  syncCalendar(input: [SyncCalendarInput!]): MutationResponse! @verifyUser
+  updateCalendarEvent(
+    id: Int!
+    title: String!
+    start_date: Date!
+    end_date: Date!
+  ): MutationResponse! @verifyUser
+  deleteCalendarEvent(id: Int!): MutationResponse! @verifyUser
+
+  createCustomImage(url: String!): MutationResponse! @verifyUser
+  updateCustomImage(id: ID!, url: String!): MutationResponse! @verifyUser
+  deleteCustomImage(id: ID!): MutationResponse! @verifyUser
+
+  uploadFile(file: Upload!): FileUploadResponse!
+
+  addActorToGenreMovies(actorId: Int!, genreName: String!): AllMoviesResponse!
+}
